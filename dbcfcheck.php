@@ -155,11 +155,11 @@ function dbcfcheck_civicrm_check(&$messages, $statusNames = [], $includeDisabled
   if ($job_alert_message) {
     // format the message
     $html = '<table>';
-    $html .= '<tr><th>Custom Group</th><th>Missing field column</th></tr>';
+    $html .= '<tr><th>{ts}Custom Group{/ts}</th><th>{ts}Missing field column{/ts}</th></tr>';
     foreach ($job_alert_message as $fieldID => $fieldDetail) {
       $html .= '<tr><td>' . $fieldDetail['customGroup'] . '</td><td> (' . $fieldID . ') ' . $fieldDetail['customField'] . '</td></tr>';
     }
-    $html .= '<tr><td colspan="2">These field(s) column are not present in actual custom table, you need to delete these fields</td></tr>';
+    $html .= '<tr><td colspan="2">{ts}These field(s) column are not present in actual custom table, you need to delete these fields.{/ts}</td></tr>';
     $html .= '</table>';
 
     if (!empty($html)) {
@@ -167,13 +167,12 @@ function dbcfcheck_civicrm_check(&$messages, $statusNames = [], $includeDisabled
         new CRM_Utils_Check_Message(
           __FUNCTION__,
           $html,
-          ts('Custom Field Checker'),
+          E::ts('Custom Field Checker'),
           \Psr\Log\LogLevel::ERROR,
           'fa-bug'
         );
     }
   }
-
 }
 
 
@@ -195,10 +194,11 @@ function dbcfcheck_civicrm_pageRun(&$page) {
     catch (CiviCRM_API3_Exception $exception) {
 
     }
+
     if (!empty($numberOfFields) && !empty($currentCount)) {
       if ($currentCount >= $numberOfFields) {
         $template = CRM_Core_Smarty::singleton();
-        $message = ts('Adding New fields is disabled for this custom group, Number of custom field allowed on each custom groups are %1, you have reached to the limit on this custom group.', [1 => $numberOfFields]);
+        $message = E::ts('Adding New fields is disabled for this custom group, Number of custom field allowed on each custom groups are %1, you have reached to the limit on this custom group.', [1 => $numberOfFields]);
         $template->assign('disabled_new_field_message', $message);
         $template->assign('disabled_new_field', TRUE);
       }

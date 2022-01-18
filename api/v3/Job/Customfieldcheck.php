@@ -31,8 +31,8 @@ function civicrm_api3_job_Customfieldcheck($params) {
   while ($dao->fetch()) {
     $listFields = $tableFields = [];
     // get the fields of each Custom Group
-    $sqlQuery = "SELECT id, label, column_name 
-          FROM `civicrm_custom_field` 
+    $sqlQuery = "SELECT id, label, column_name
+          FROM `civicrm_custom_field`
           where custom_group_id = " . $dao->id;
 
     $dao2 = CRM_Core_DAO::executeQuery($sqlQuery, CRM_Core_DAO::$_nullArray);
@@ -42,17 +42,13 @@ function civicrm_api3_job_Customfieldcheck($params) {
     }
     // get column present on actual custom table through information_schema
     $sqlQuery = "SELECT column_name
-      FROM information_schema.columns WHERE table_schema = database() 
-      AND table_name = %1 
+      FROM information_schema.columns WHERE table_schema = database()
+      AND table_name = %1
       ORDER BY ordinal_position ASC";
     $inputTable = [1 => [$dao->table_name, 'String']];
     $dao3 = CRM_Core_DAO::executeQuery($sqlQuery, $inputTable);
-    $test = ['multireg_enabled_19', 'event_invites_11', 'marriage_date_3'];
     while ($dao3->fetch()) {
       if ($dao3->column_name == 'id' || $dao3->column_name == 'entity_id') {
-        continue;
-      }
-      if (in_array($dao3->column_name, $test)) {
         continue;
       }
       $tableFields[] = $dao3->column_name;
