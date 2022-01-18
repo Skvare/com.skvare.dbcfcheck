@@ -30,7 +30,7 @@ function civicrm_api3_job_Customfieldcheck($params) {
   $listFieldsLabel = [];
   $databaseName = CRM_Core_DAO::getDatabaseName();
   while ($dao->fetch()) {
-    $listFields = $tableFields = [];
+    $listFields = $tableFields = $customFieldsLabel = [];
     // get the fields of each Custom Group
     $sqlQuery = "SELECT id, label, column_name
           FROM `civicrm_custom_field`
@@ -40,6 +40,7 @@ function civicrm_api3_job_Customfieldcheck($params) {
 
     while ($dao2->fetch()) {
       $listFields[$dao2->id] = $dao2->column_name;
+      $customFieldsLabel[$dao2->id] = $dao2->label;
     }
     // get column present on actual custom table through information_schema
     $sqlQuery = "SELECT column_name
@@ -64,7 +65,7 @@ function civicrm_api3_job_Customfieldcheck($params) {
         // Missing Column in the Table
         $listFieldsLabel[$listFieldId] = [
           'customGroup' => $dao->title,
-          'customField' => $dao2->label,
+          'customField' => $customFieldsLabel[$listFieldId],
         ];
       }
     }
