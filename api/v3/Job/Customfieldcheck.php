@@ -28,6 +28,7 @@ function civicrm_api3_job_Customfieldcheck($params) {
   $sqlQuery = "select id, title, table_name from civicrm_custom_group";
   $dao = CRM_Core_DAO::executeQuery($sqlQuery, CRM_Core_DAO::$_nullArray);
   $listFieldsLabel = [];
+  $databaseName = CRM_Core_DAO::getDatabaseName();
   while ($dao->fetch()) {
     $listFields = $tableFields = [];
     // get the fields of each Custom Group
@@ -42,7 +43,7 @@ function civicrm_api3_job_Customfieldcheck($params) {
     }
     // get column present on actual custom table through information_schema
     $sqlQuery = "SELECT column_name
-      FROM information_schema.columns WHERE table_schema = database()
+      FROM information_schema.columns WHERE table_schema = '{$databaseName}'
       AND table_name = %1
       ORDER BY ordinal_position ASC";
     $inputTable = [1 => [$dao->table_name, 'String']];
@@ -51,9 +52,13 @@ function civicrm_api3_job_Customfieldcheck($params) {
       if ($dao3->column_name == 'id' || $dao3->column_name == 'entity_id') {
         continue;
       }
-      $tableFields[] = $dao3->column_name;
+      if (!empty($dao3->column_name)) {
+        $tableFields[] = $dao3->column_name;
+      }
+      elseif (!empty($dao3->COLUMN_NAME)) {
+        $tableFields[] = $dao3->COLUMN_NAME;
+      }
     }
-
     foreach ($listFields as $listFieldId => $fieldColumnName) {
       if (!in_array($fieldColumnName, $tableFields)) {
         // Missing Column in the Table

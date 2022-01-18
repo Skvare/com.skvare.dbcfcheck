@@ -155,11 +155,11 @@ function dbcfcheck_civicrm_check(&$messages, $statusNames = [], $includeDisabled
   if ($job_alert_message) {
     // format the message
     $html = '<table>';
-    $html .= '<tr><th>{ts}Custom Group{/ts}</th><th>{ts}Missing field column{/ts}</th></tr>';
+    $html .= '<tr><th>Custom Group</th><th>Missing field column</th></tr>';
     foreach ($job_alert_message as $fieldID => $fieldDetail) {
       $html .= '<tr><td>' . $fieldDetail['customGroup'] . '</td><td> (' . $fieldID . ') ' . $fieldDetail['customField'] . '</td></tr>';
     }
-    $html .= '<tr><td colspan="2">{ts}These field(s) column are not present in actual custom table, you need to delete these fields.{/ts}</td></tr>';
+    $html .= '<tr><td colspan="2">These field(s) column are not present in actual custom table, you need to delete these fields.</td></tr>';
     $html .= '</table>';
 
     if (!empty($html)) {
