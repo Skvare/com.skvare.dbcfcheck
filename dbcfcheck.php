@@ -182,10 +182,10 @@ function dbcfcheck_civicrm_check(&$messages, $statusNames = [], $includeDisabled
 function dbcfcheck_civicrm_pageRun(&$page) {
   if (get_class($page) == 'CRM_Custom_Page_Field' && $page->getVar('_gid')) {
     $rowSize = (int)CRM_Dbcfcheck_Utils::getRowSizeOfTable($page->getVar('_gid'));
-    // set default limit to 1000 char minius from 65535.
+    // set default limit to 1000 char minus from 65535.
     if ($rowSize > 64535) {
       $template = CRM_Core_Smarty::singleton();
-      $message = ts('Adding New fields is disabled for this custom group, based on MySQL Row size limit of max 65535 and type of fields used in this custom group, current calculated row size is %1, adding new fields into custom group will get failed which lead sql error in search, online transaction.', [1 => $rowSize]);
+      $message = ts('Adding New fields is disabled for this custom group, based on the MySQL Row size limit of max 65535 and the type of fields used in this custom group, current calculated row size is %1, adding new fields into the custom group will fail, which leads to a SQL error in search, online transaction.', [1 => $rowSize]);
       $template->assign('disabled_new_field_message', $message);
       $template->assign('disabled_new_field', TRUE);
     }

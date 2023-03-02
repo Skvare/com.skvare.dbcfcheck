@@ -40,8 +40,31 @@ cv en dbcfcheck
 ```
 
 ## Usage
+This extension also provides tabular reports for custom fields where the column is
+missing. You can delete these fields though UI if possible or in the
+database directly.
 
 ![Screenshot](/images/screenshot_1.png)
+
+## Errors
+
+If you check the civicrm logs, you may find similar errors.
+```sql
+ALTER TABLE civicrm_value_event_participant_consents_and_authorizati_12
+  ADD COLUMN `subsidy_450` varchar(255),
+  ADD INDEX INDEX_subsidy_450 ( subsidy_450 )
+
+[nativecode=1118 ** Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs]
+```
+We cannot increase the size  of innodb_page_size parameter, it is read only, it configured once during creation of database for more detail refer:
+https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_page_size
+
+Row size information available at : https://dev.mysql.com/doc/mysql-reslimits-excerpt/8.0/en/column-count-limit.html#row-size-limits
+
+Column size varies based on `COLLATION` type used on each column.
+* utf8_unicode_ci (bytes per char: 3)
+* utf8mb4_unicode_ci (bytes per char: 4)
+* latin1 (bytes per char: 1)
 
 ## Reference
 * https://projects.skvare.com/issues/15557

@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <extension key="com.skvare.dbcfcheck" type="module">
   <file>dbcfcheck</file>
-  <name>Limit Custom Field for Custom Groups</name>
-  <description>Limit number of custom fields per Custom Group to avoid Database Errors.</description>
+  <name>Limit Custom Fields for the Custom Groups</name>
+  <description>Limit the number of custom fields per custom group to avoid
+    database errors based on the size of the field and type of collation of the
+    column of custom fields.</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Sunil Pawar</author>
