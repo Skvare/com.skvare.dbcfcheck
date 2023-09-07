@@ -2,11 +2,11 @@
 
 ![Screenshot](/images/screenshot_2.png)
 
-This extention help to provide errors relate to custom field when we add
- field to custom table more than row size limit on the table.
+This extension helps to provide errors related to custom fields when we add
+ fields to a custom table that exceed the row size limit on the table.
 
-Based on row size available for the table, we disable the add new custom
-field button.
+Based on the row size available for the table, we disabled the add new
+custom field button.
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
@@ -41,7 +41,7 @@ cv en dbcfcheck
 
 ## Usage
 This extension also provides tabular reports for custom fields where the column is
-missing. You can delete these fields though UI if possible or in the
+missing. You can delete these fields through the UI if possible or in the
 database directly.
 
 ![Screenshot](/images/screenshot_1.png)
@@ -59,9 +59,9 @@ ALTER TABLE civicrm_value_event_participant_consents_and_authorizati_12
 We cannot increase the size  of innodb_page_size parameter, it is read only, it configured once during creation of database for more detail refer:
 https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_page_size
 
-Row size information available at : https://dev.mysql.com/doc/mysql-reslimits-excerpt/8.0/en/column-count-limit.html#row-size-limits
+Row-size information is available at: https://dev.mysql.com/doc/mysql-reslimits-excerpt/8.0/en/column-count-limit.html#row-size-limits
 
-Column size varies based on `COLLATION` type used on each column.
+Column size varies based on the `COLLATION` type used on each column.
 * utf8_unicode_ci (bytes per char: 3)
 * utf8mb4_unicode_ci (bytes per char: 4)
 * latin1 (bytes per char: 1)
