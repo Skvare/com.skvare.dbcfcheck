@@ -2,7 +2,7 @@
 
 ![Screenshot](/images/screenshot_2.png)
 
-This extension helps to provide errors related to custom fields when we add
+This extension helps to prevent errors related to custom fields when we add
  fields to a custom table that exceed the row size limit on the table.
 
 Based on the row size available for the table, we disabled the add new
