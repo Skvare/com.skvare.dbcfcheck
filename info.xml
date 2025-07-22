@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 <extension key="com.skvare.dbcfcheck" type="module">
   <file>dbcfcheck</file>
-  <name>Limit Custom Fields for the Custom Groups</name>
-  <description>Limit the number of custom fields per custom group to avoid
-    database errors based on the size of the field and type of collation of the
-    column of custom fields.</description>
+  <name>Database Custom Field Checker</name>
+  <description>Prevents MySQL row size limit errors and detects orphaned custom fields.</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Sunil Pawar</author>
@@ -16,13 +14,17 @@
     <url desc="Support">https://github.com/Skvare/com.skvare.dbcfcheck</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2021-06-01</releaseDate>
-  <version>1.1</version>
-  <develStage>alpha</develStage>
+  <releaseDate>2025-07-22</releaseDate>
+  <version>1.2</version>
+  <develStage>stable</develStage>
   <compatibility>
-    <ver>5.27</ver>
+    <ver>5.45</ver>
+    <ver>5.69</ver>
+    <ver>5.75</ver>
+    <ver>5.81</ver>
+    <ver>6.4</ver>
   </compatibility>
-  <comments>This is a new, undeveloped module</comments>
+  <comments>Production-ready extension for MySQL row size monitoring and custom field validation. Prevents database errors and maintains data integrity.</comments>
   <classloader>
     <psr4 prefix="Civi\" path="Civi"/>
     <psr0 prefix="CRM_" path="."/>
