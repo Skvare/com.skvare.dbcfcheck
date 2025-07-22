@@ -1,94 +1,208 @@
-# com.skvare.dbcfcheck
+# CiviCRM Database Custom Field Check Extension
 
-![Screenshot](/images/screenshot_2.png)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![CiviCRM Version](https://img.shields.io/badge/CiviCRM-5.45+-orange.svg)](https://civicrm.org/)
+[![PHP Version](https://img.shields.io/badge/PHP-7.0+-777BB4.svg)](https://php.net/)
 
-This extension helps to prevent errors related to custom fields when we add
-fields to a custom table that exceed the row size limit on the table.
+A CiviCRM extension that prevents database errors by monitoring custom field table row sizes and detecting orphaned custom fields.
 
-Based on the row size available for the table, we disable the add new
-custom field button when the calculated row size exceeds 64,535 bytes
-(leaving a 1000 byte buffer from MySQL's 65,535 limit).
+![Extension Screenshot](/images/dbcheck_report_on_page.png)
 
-The extension is licensed under [AGPL-3.0](LICENSE.txt).
+## 🚀 Overview
 
-## Requirements
+This extension addresses critical database issues in CiviCRM by:
+- **Preventing row size limit errors** when adding custom fields
+- **Detecting orphaned custom fields** with missing database columns
+- **Providing system status integration** for proactive monitoring
 
-* PHP v7.0+
-* CiviCRM 5.45+
+MySQL has a hard limit of 65,535 bytes per table row. When custom fields push tables beyond this limit, database operations fail. This extension calculates current row sizes and prevents new field creation when approaching this limit.
 
-## Installation (Web UI)
+## ✨ Key Features
 
-This extension has not yet been published for installation via the web UI.
+### 🛡️ Row Size Protection
+- **Automatic monitoring** of custom group table sizes
+- **Smart prevention** of field additions that would exceed MySQL limits
+- **User-friendly warnings** with clear explanations
+- **1,000 byte safety buffer** to ensure reliable operation
 
-## Installation (CLI, Zip)
+### 🔍 Orphaned Field Detection
+- **Comprehensive scanning** for custom fields missing database columns
+- **Tabular reports** showing problematic fields
+- **Safe deletion tools** for cleanup operations
+- **Database integrity verification**
 
-Sysadmins and developers may download the `.zip` file for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
+### 📊 System Status Integration
+- **Native CiviCRM status checker** integration
+- **Proactive alerts** for database issues
+- **Administrative dashboard** warnings
+
+![Status Check Screenshot](/images/screenshot_1.png)
+
+## 📋 Requirements
+
+| Component | Version |
+|-----------|---------|
+| **PHP** | 7.0+ |
+| **CiviCRM** | 5.45+ |
+| **MySQL** | 5.6+ |
+
+## 📦 Installation
+
+### Option 1: CLI Installation (Recommended)
+
+**Using CV (CiviCRM CLI tool):**
 
 ```bash
-cd <extension-dir>
+# Download and install from ZIP
+cd <extension-directory>
 cv dl com.skvare.dbcfcheck@https://github.com/skvare/com.skvare.dbcfcheck/archive/master.zip
 ```
 
-## Installation (CLI, Git)
-
-Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) repo for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
+**Using Git:**
 
 ```bash
+# Clone repository
 git clone https://github.com/skvare/com.skvare.dbcfcheck.git
+cd com.skvare.dbcfcheck
+
+# Enable extension
 cv en dbcfcheck
 ```
 
-## Features
+### Option 2: Manual Installation
 
-### 1. Row Size Protection
-The extension automatically calculates the current row size of custom group tables and prevents adding new fields when the table approaches MySQL's row size limit (65,535 bytes). When the calculated size exceeds 64,535 bytes, the "Add New Field" button is disabled and a warning message is displayed.
+1. Download the latest release ZIP file
+2. Extract to your CiviCRM extensions directory
+3. Navigate to **Administer → System Settings → Extensions**
+4. Find "Database Custom Field Check" and click **Install**
 
-### 2. Custom Field Validation
-Provides tabular reports for custom fields where the database column is missing. You can delete these orphaned fields through the UI if possible or directly in the database.
+### Verification
 
-### 3. Status Check Integration
-Integrates with CiviCRM's system status checker to display alerts about problematic custom fields that need attention.
+After installation, verify the extension is working:
+1. Go to **Administer → System Settings → System Status**
+2. Look for custom field validation messages
+3. Navigate to any Custom Fields page to see row size monitoring
 
-![Screenshot](/images/screenshot_1.png)
+## 🔧 Technical Details
 
-## Technical Implementation
+### How Row Size Calculation Works
 
-### Hook: dbcfcheck_civicrm_pageRun
-Located in `dbcfcheck.php`, this hook:
-- Monitors the CRM_Custom_Page_Field page
-- Calculates current row size using MySQL INFORMATION_SCHEMA
-- Disables the "Add New Field" button when row size > 64,535 bytes
-- Displays a warning message explaining the limitation
+The extension uses sophisticated MySQL metadata queries to calculate exact byte usage:
 
-### Row Size Calculation
-The extension uses a sophisticated SQL query (`CRM/Dbcfcheck/Utils.php`) that calculates the exact byte size for each column type including:
-- Numeric types (tinyint, int, bigint, decimal, etc.)
-- String types (varchar, text, with proper charset consideration)
-- Date/time types
-- Binary data types
-
-## Errors
-
-If you check the civicrm logs, you may find similar errors.
 ```sql
-ALTER TABLE civicrm_value_event_participant_consents_and_authorizati_12
-  ADD COLUMN `subsidy_450` varchar(255),
-  ADD INDEX INDEX_subsidy_450 ( subsidy_450 )
-
-[nativecode=1118 ** Row size too large. The maximum row size for the used table type, not counting BLOBs, is 65535. This includes storage overhead, check the manual. You have to change some columns to TEXT or BLOBs]
+SELECT
+  COLUMN_NAME,
+  DATA_TYPE,
+  CHARACTER_MAXIMUM_LENGTH,
+  NUMERIC_PRECISION,
+  COLLATION_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'your_custom_table'
 ```
-We cannot increase the size  of innodb_page_size parameter, it is read only, it configured once during creation of database for more detail refer:
-https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_page_size
 
-Row-size information is available at: https://dev.mysql.com/doc/mysql-reslimits-excerpt/8.0/en/column-count-limit.html#row-size-limits
+**Column Type Calculations:**
+- **Numeric types**: `TINYINT(1)`, `INT(4)`, `BIGINT(8)`, `DECIMAL(variable)`
+- **String types**: `VARCHAR(n × charset_bytes)`, `TEXT(65,535)`
+- **Date types**: `DATE(3)`, `DATETIME(8)`, `TIMESTAMP(4)`
+- **Binary types**: Exact byte storage requirements
 
-Column size varies based on the `COLLATION` type used on each column.
-* utf8_unicode_ci (bytes per char: 3)
-* utf8mb4_unicode_ci (bytes per char: 4)
-* latin1 (bytes per char: 1)
+### Character Set Impact
 
-## Reference
-* https://projects.skvare.com/issues/15557
-* https://projects.skvare.com/issues/13848
+Row size varies significantly based on database collation:
+
+| Collation | Bytes per Character | Impact on VARCHAR(255) |
+|-----------|-------------------|----------------------|
+| `latin1` | 1 byte | 255 bytes |
+| `utf8_unicode_ci` | 3 bytes | 765 bytes |
+| `utf8mb4_unicode_ci` | 4 bytes | 1,020 bytes |
+
+## 🚨 Troubleshooting
+
+### Common Error Messages
+
+**"Row size too large" Error:**
+```sql
+ALTER TABLE civicrm_value_custom_table_12
+  ADD COLUMN `new_field_123` VARCHAR(255)
+
+[nativecode=1118 ** Row size too large. The maximum row size
+for the used table type, not counting BLOBs, is 65535...]
+```
+
+**Solution:** Use the extension's monitoring to prevent this error before it occurs.
+
+### Orphaned Custom Fields
+
+**Symptoms:**
+- Custom fields appear in CiviCRM admin but don't function
+- Database errors when accessing certain records
+- Missing columns in database tables
+
+**Resolution:**
+1. Navigate to **Administer → System Settings → System Status**
+2. Review custom field validation warnings
+3. Use the extension's cleanup tools to remove orphaned fields
+
+### Performance Considerations
+
+- Row size calculations are cached for 1 hour
+- Only runs on custom field administration pages
+- Minimal impact on normal CiviCRM operations
+
+## 🔗 Useful Resources
+
+### MySQL Documentation
+- [Row Size Limits](https://dev.mysql.com/doc/mysql-reslimits-excerpt/8.0/en/column-count-limit.html#row-size-limits)
+- [InnoDB Page Size](https://dev.mysql.com/doc/refman/5.6/en/innodb-parameters.html#sysvar_innodb_page_size)
+
+### Project References
+- [Original Issue #15557](https://projects.skvare.com/issues/15557)
+- [Related Issue #13848](https://projects.skvare.com/issues/13848)
+
+## 🤝 Contributing
+
+We welcome contributions! Please:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Development Setup
+
+```bash
+# Clone for development
+git clone https://github.com/skvare/com.skvare.dbcfcheck.git
+cd com.skvare.dbcfcheck
+
+# Install in development mode
+cv en dbcfcheck --dev
+```
+
+## 📝 License
+
+This project is licensed under the **GNU Affero General Public License v3.0** - see the [LICENSE.txt](LICENSE.txt) file for details.
+
+## 🆘 Support
+
+- **Documentation**: Check this README and inline code comments
+- **Issues**: Report bugs via [GitHub Issues](https://github.com/skvare/com.skvare.dbcfcheck/issues)
+- **Community**: Join CiviCRM community forums for general questions
+
+---
+
+**Made by [Skvare](https://github.com/Skvare)**
+
+**Supporting Organizations**
+[Skvare](https://skvare.com/contact)
+
+## Protect Your Database Today
+
+Don't wait for a row size error to disrupt your operations. Install proactive monitoring that prevents problems before they occur, helps clean up existing issues, and provides ongoing visibility into your custom field architecture.
+
+Your future self will thank you for preventing a database crisis that could have been avoided with proper monitoring and limits.
+
+---
+
+**[Contact us](https://skvare.com/contact) for support or to learn more** about implementing database protection and custom field management in your CiviCRM environment.
