@@ -66,16 +66,41 @@ function dbcfcheck_civicrm_check(&$messages, $statusNames = [], $includeDisabled
 
 /**
  * Implementation of hook_civicrm_pageRun
+ *
+ * Monitors custom field pages and disables new field creation when
+ * the table row size approaches MySQL's limit of 65,535 bytes.
  */
 function dbcfcheck_civicrm_pageRun(&$page) {
   if (get_class($page) == 'CRM_Custom_Page_Field' && $page->getVar('_gid')) {
-    $rowSize = (int)CRM_Dbcfcheck_Utils::getRowSizeOfTable($page->getVar('_gid'));
-    // set default limit to 1000 char minus from 65535.
-    if ($rowSize > 64535) {
-      $template = CRM_Core_Smarty::singleton();
-      $message = ts('Adding New fields is disabled for this custom group, based on the MySQL Row size limit of max 65535 and the type of fields used in this custom group, current calculated row size is %1, adding new fields into the custom group will fail, which leads to a SQL error in search, online transaction.', [1 => $rowSize]);
-      $template->assign('disabled_new_field_message', $message);
-      $template->assign('disabled_new_field', TRUE);
+    try {
+      $customGroupId = $page->getVar('_gid');
+      $rowSize = (int)CRM_Dbcfcheck_Utils::getRowSizeOfTable($customGroupId);
+
+      // Set conservative limit: 1000 bytes buffer from MySQL's 65535 limit
+      $maxRowSize = 65535;
+      $buffer = 1000;
+      $threshold = $maxRowSize - $buffer;
+
+      if ($rowSize > $threshold) {
+        $template = CRM_Core_Smarty::singleton();
+        $percentUsed = round(($rowSize / $maxRowSize) * 100, 1);
+
+        $message = ts('Adding new fields is disabled for this custom group. Current row size: %1 bytes (%2% of MySQL limit). Adding new fields may exceed the maximum row size of %3 bytes, causing SQL errors in searches and transactions.', [
+          1 => number_format($rowSize),
+          2 => $percentUsed,
+          3 => number_format($maxRowSize)
+        ]);
+
+        $template->assign('disabled_new_field_message', $message);
+        $template->assign('disabled_new_field', TRUE);
+        $template->assign('current_row_size', $rowSize);
+        $template->assign('max_row_size', $maxRowSize);
+        $template->assign('row_size_percent', $percentUsed);
+      }
+    }
+    catch (Exception $e) {
+      // Log error but don't break the page
+      Civi::log()->error('DBCFCheck: Error calculating row size for custom group ' . $customGroupId . ': ' . $e->getMessage());
     }
   }
 }

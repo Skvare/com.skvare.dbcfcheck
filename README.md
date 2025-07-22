@@ -3,10 +3,11 @@
 ![Screenshot](/images/screenshot_2.png)
 
 This extension helps to prevent errors related to custom fields when we add
- fields to a custom table that exceed the row size limit on the table.
+fields to a custom table that exceed the row size limit on the table.
 
-Based on the row size available for the table, we disabled the add new
-custom field button.
+Based on the row size available for the table, we disable the add new
+custom field button when the calculated row size exceeds 64,535 bytes
+(leaving a 1000 byte buffer from MySQL's 65,535 limit).
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
@@ -39,12 +40,34 @@ git clone https://github.com/skvare/com.skvare.dbcfcheck.git
 cv en dbcfcheck
 ```
 
-## Usage
-This extension also provides tabular reports for custom fields where the column is
-missing. You can delete these fields through the UI if possible or in the
-database directly.
+## Features
+
+### 1. Row Size Protection
+The extension automatically calculates the current row size of custom group tables and prevents adding new fields when the table approaches MySQL's row size limit (65,535 bytes). When the calculated size exceeds 64,535 bytes, the "Add New Field" button is disabled and a warning message is displayed.
+
+### 2. Custom Field Validation
+Provides tabular reports for custom fields where the database column is missing. You can delete these orphaned fields through the UI if possible or directly in the database.
+
+### 3. Status Check Integration
+Integrates with CiviCRM's system status checker to display alerts about problematic custom fields that need attention.
 
 ![Screenshot](/images/screenshot_1.png)
+
+## Technical Implementation
+
+### Hook: dbcfcheck_civicrm_pageRun
+Located in `dbcfcheck.php`, this hook:
+- Monitors the CRM_Custom_Page_Field page
+- Calculates current row size using MySQL INFORMATION_SCHEMA
+- Disables the "Add New Field" button when row size > 64,535 bytes
+- Displays a warning message explaining the limitation
+
+### Row Size Calculation
+The extension uses a sophisticated SQL query (`CRM/Dbcfcheck/Utils.php`) that calculates the exact byte size for each column type including:
+- Numeric types (tinyint, int, bigint, decimal, etc.)
+- String types (varchar, text, with proper charset consideration)
+- Date/time types
+- Binary data types
 
 ## Errors
 
