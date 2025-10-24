@@ -22,7 +22,7 @@ function _civicrm_api3_job_Customfieldcheck_spec(&$spec) {
  *
  * @see civicrm_api3_create_success
  *
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */
 function civicrm_api3_job_Customfieldcheck($params) {
   $sqlQuery = "select id, title, table_name from civicrm_custom_group";
