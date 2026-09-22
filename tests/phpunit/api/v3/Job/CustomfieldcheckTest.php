@@ -46,7 +46,7 @@ class api_v3_Job_CustomfieldcheckTest extends \PHPUnit\Framework\TestCase implem
    * Note how the function name begins with the word "test".
    */
   public function testApiExample() {
-    $result = civicrm_api3('Job', 'Customfieldcheck', array('magicword' => 'sesame'));
+    $result = civicrm_api3('Job', 'Customfieldcheck', ['magicword' => 'sesame']);
     $this->assertEquals('Twelve', $result['values'][12]['name']);
   }
 
